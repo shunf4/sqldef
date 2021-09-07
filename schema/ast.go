@@ -70,6 +70,8 @@ type Column struct {
 	references     string
 	identity       *Identity
 	sequence       *Sequence
+
+	comment *Value
 	// TODO: keyopt
 	// XXX: zerofill?
 }

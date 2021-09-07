@@ -860,6 +860,12 @@ func (g *Generator) generateColumnDefinition(column Column, enableUnique bool) (
 		}
 	}
 
+	if g.mode == GeneratorModeMysql {
+		if column.comment != nil && string(column.comment.raw) != "" {
+			definition += " COMMENT '" + strings.ReplaceAll(string(column.comment.raw), "'", "''") + "'"
+		}
+	}
+
 	definition = strings.TrimSuffix(definition, " ")
 	return definition, nil
 }
@@ -1253,6 +1259,18 @@ func findTriggerByName(triggers []*Trigger, name string) *Trigger {
 	return nil
 }
 
+func sameComment(a *Value, b *Value) bool {
+	aStr := ""
+	bStr := ""
+	if a != nil {
+		aStr = string(a.raw)
+	}
+	if b != nil {
+		bStr = string(b.raw)
+	}
+	return aStr == bStr
+}
+
 func (g *Generator) haveSameColumnDefinition(current Column, desired Column) bool {
 	// Not examining AUTO_INCREMENT and UNIQUE KEY because it'll be added in a later stage
 	return g.haveSameDataType(current, desired) &&
@@ -1262,6 +1280,7 @@ func (g *Generator) haveSameColumnDefinition(current Column, desired Column) boo
 		(current.check == desired.check) &&
 		(desired.charset == "" || current.charset == desired.charset) && // detect change column only when set explicitly. TODO: can we calculate implicit charset?
 		(desired.collate == "" || current.collate == desired.collate) && // detect change column only when set explicitly. TODO: can we calculate implicit collate?
+		(g.mode != GeneratorModeMysql || sameComment(current.comment, desired.comment)) &&
 		reflect.DeepEqual(current.onUpdate, desired.onUpdate)
 }
 
