@@ -149,12 +149,19 @@ func parseTable(mode GeneratorMode, stmt *sqlparser.DDL) (Table, error) {
 
 		indexOptions := []IndexOption{}
 		for _, option := range indexDef.Options {
+			newIndexOptions := IndexOption{
+				optionName: option.Name,
+				value:      parseValue(option.Value),
+			}
+			if newIndexOptions.value == nil {
+				newIndexOptions.value = parseValue(&sqlparser.SQLVal{
+					Type: sqlparser.StrVal,
+					Val:  []byte(option.Using),
+				})
+			}
 			indexOptions = append(
 				indexOptions,
-				IndexOption{
-					optionName: option.Name,
-					value:      parseValue(option.Value),
-				},
+				newIndexOptions,
 			)
 		}
 
