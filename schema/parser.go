@@ -118,6 +118,7 @@ func parseTable(mode GeneratorMode, stmt *sqlparser.DDL) (Table, error) {
 			references:    parsedCol.Type.References,
 			identity:      parseIdentity(parsedCol.Type.Identity),
 			sequence:      parseIdentitySequence(parsedCol.Type.Identity),
+			comment:       parseValue(parsedCol.Type.Comment),
 		}
 		if parsedCol.Type.Check != nil {
 			column.check = &CheckDefinition{
